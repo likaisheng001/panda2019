@@ -26,8 +26,9 @@ public class MyMvcConfig extends WebMvcConfigurerAdapter{
         //super.addInterceptors(registry);
         //静态资源：*.css,*.js
         //springboot已经做好了静态资源映射
-        registry.addInterceptor(new LoginHandlerInterceptor()).addPathPatterns("/**").
-                excludePathPatterns("/index.html","/","/user/login");
+        //拦截器暂时被注释
+        //registry.addInterceptor(new LoginHandlerInterceptor()).addPathPatterns("/**").
+        //        excludePathPatterns("/index.html","/","/user/login");
     }
 
     //所有的WebMvcConfigurerAdapter组件都会一起起作用
