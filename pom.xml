@@ -7,6 +7,9 @@
     <groupId>com.study2019</groupId>
     <artifactId>study2019</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>springboot10-gp-demo</module>
+    </modules>
     <packaging>pom</packaging>
 
 </project>

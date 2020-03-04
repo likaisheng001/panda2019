@@ -1,0 +1,79 @@
+本项目的内容：此项目主要演示Spring REST在Spring MVC中的应用。
+
+Spring REST内容大纲:
+    理论基础
+    REST on Spring Web MVC。
+    REST on Spring Web Flux  -- 未学习。
+
+REST-理论基础：
+    REST = Representational State Transfer,即表述性状态传递。
+
+REST需要掌握的三大内容：
+    理解资源操作；
+        PUT、GET、POST、DELETE。
+        幂等方法 - 未理解。
+    理解自描述消息；
+        Content-Type
+        Accept
+        MIME-Type - ？？？
+    扩展自描述消息；
+
+------- 自描述消息 ---------
+服务端                 浏览器                                     作用(针对浏览器进行说明)
+consumes      对应     Accept(Request Headers)                    告诉外界浏览器可接收的消息格式
+produces      对应     Content-Type(Response Headers)             告诉外界浏览器发送消息的格式
+服务端和浏览器之间的消息传递是靠messageConverters来进行处理的
+当浏览器和服务器的设置对不上时，会产生406 不能执行的错误。
+
+示例：
+Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,/;q=0.8
+第一优先顺序：text/html --> application/xhtml+xml --> application/xml
+第二优先顺序：image/webp --> image/apng
+
+源码追溯：
+@EnableWebMvc
+    DelegatingWebMvcConfiguration
+        WebMvcConfigurationSupport > addDefaultHttpMessageConverters();
+            messageConverters:其中包含很多自描述消息类型的处理，比如JSON、XML、TEXT等
+------- 自描述消息 ---------
+
+------- 扩展自描述消息 ---------
+扩展自描述消息，也就是扩展HttpMessageConverter。
+
+XML格式:              application/xml
+<Person>
+    <id>1</id>
+    <name>李开生</name>
+</Person>
+
+Properties格式(将扩展):      application/properties+person
+person.id=1
+person.name=李开生
+
+扩展自描述信息步骤：
+1.自定义WebMvc配置类 WebMvcConfig <|.. WebMvcConfigurer
+2.自定义消息转换器PropertiesPersonHttpMessageConverter <|-- AbstractHttpMessageConverter
+3.将自定义的消息转换器通过WebMvcConfig > extendMessageConverters() 方法添加进系统的消息转换器集合里。
+------- 扩展自描述消息 ---------
+
+以application/json为例,Spring Boot中默认使用Jaskson2序列化方法，其中媒体类型：application/json，它的处理类JacksonHttpMessageConvertersConfiguration。
+JacksonHttpMessageConvertersConfiguration：
+    1.读read*:通过HTTP请求内容转化成对应的Bean。
+    2.写write*:通过Bean序列化成对应文本内容作为响应内容。
+
+问题：为什么浏览器第一次请求http://localhost:8080/person/1?name=vulan，返回是JSON，后来加了XML相关依赖，又变成了XML？
+回答：SpringBoot应用默认没有增加XML处理器实现，所以最后采用轮询的方式去逐一尝试是否可以canWrite(POJO)。
+      如果返回true，说明可以序列化POJO对象，那么Jackson2恰好能处理，Jsckson2就输出了。
+
+问题：当Accept请求头未被指定时，为什么还是JSON来处理？
+回答：这个依赖于messageConverters的插入顺序。
+
+问题：为什么一定要经过POJO?
+回答：JSON --> 反序列化 --> Map --> Properties。
+
+扩展：
+1.小马哥 《Spring Boot编程思想》
+2.Java9并发编程 Reactive Streams
+
+
+
